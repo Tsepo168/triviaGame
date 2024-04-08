@@ -9,12 +9,15 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.util.Duration;
 
 import java.util.*;
 
 public class TrivGame extends Application {
 
-    private static final int NUM_QUESTIONS = 4;
+    private static final int NUM_QUESTIONS = 5;
 
     private Stage stage;
     private List<Scene> questionScenes;
@@ -41,22 +44,23 @@ public class TrivGame extends Application {
     private void initializeQuestions() {
         questions = new ArrayList<>();
 
-        List<String> options1 = Arrays.asList("Maseru", "Lobamba", "Manzini", "Mbabane");
-        Image image1 = new Image("maseru.jpg");
-        questions.add(new Question("What is the capital city of Lesotho?", "Maseru", options1, image1));
+        // Add questions with associated images and video clips
+        Image maseruImage = new Image(getClass().getResource("/com/example/triviagame/maseru.jpg").toExternalForm());
+        questions.add(new Question("What is the capital city of Lesotho?", "Maseru",
+                Arrays.asList("Maseru", "Lobamba", "Manzini", "Mbabane"),
+                maseruImage, "/com/example/triviagame/maseru.mp4"));
 
-        List<String> options2 = Arrays.asList("Sesotho", "Zulu", "English", "Afrikaans");
-        Image image2 = new Image("language.webp");
-        questions.add(new Question("What is the official language of Lesotho?", "Sesotho", options2, image2));
+        Image katseDamImage = new Image(getClass().getResource("/com/example/triviagame/katseDam.jpg").toExternalForm());
+        questions.add(new Question("What is the dam found in Lesotho?", "Katse Dam",
+                Arrays.asList("Kariba Dam", "Chief Joseph Dam", "Katse Dam", "Tarbela Dam"),
+                katseDamImage, "/com/example/triviagame/katse.mp4"));
 
-        List<String> options3 = Arrays.asList("Mountains", "Oceans", "Deserts", "Seas");
-        Image image3 = new Image("Mountain.jpg");
-        questions.add(new Question("What is a geographical feature found in Lesotho", "Mountains", options3, image3));
-
-        List<String> options4 = Arrays.asList("Kariba Dam", "Chief Joseph Dam", "Katse Dam", "Tarbela Dam");
-        Image image4 = new Image("katseDam.jpg");
-        questions.add(new Question("What is the dam found in Lesotho", "Katse Dam", options4, image4));
+        // Add more questions similarly
     }
+
+
+
+
 
     private List<Scene> createQuestionScenes() {
         List<Scene> scenes = new ArrayList<>();
@@ -73,6 +77,11 @@ public class TrivGame extends Application {
             imageView.setFitWidth(400);
             imageView.setFitHeight(300);
 
+            MediaPlayer mediaPlayer = new MediaPlayer(question.getVideoClip());
+            mediaPlayer.setOnEndOfMedia(() -> mediaPlayer.seek(Duration.ZERO));
+            Button playVideoButton = new Button("Play Video");
+            playVideoButton.setOnAction(e -> mediaPlayer.play());
+
             VBox optionsBox = new VBox(10);
             ToggleGroup group = new ToggleGroup();
             question.getOptions().forEach(option -> {
@@ -86,13 +95,13 @@ public class TrivGame extends Application {
                 RadioButton selectedRadioButton = (RadioButton) group.getSelectedToggle();
                 if (selectedRadioButton != null) {
                     String selectedOption = selectedRadioButton.getText();
-                    handleAnswer(selectedOption);
+                    handleAnswer(selectedOption, mediaPlayer);
                 } else {
                     showAlert("No answer selected", "Please select an answer before submitting.");
                 }
             });
 
-            layout.getChildren().addAll(questionLabel, imageView, optionsBox, submitButton);
+            layout.getChildren().addAll(questionLabel, imageView, playVideoButton, optionsBox, submitButton);
 
             Scene scene = new Scene(layout, 800, 600);
             scenes.add(scene);
@@ -109,11 +118,12 @@ public class TrivGame extends Application {
         }
     }
 
-    private void handleAnswer(String selectedOption) {
+    private void handleAnswer(String selectedOption, MediaPlayer mediaPlayer) {
         Question currentQuestion = questions.get(currentQuestionIndex);
         if (currentQuestion.isCorrect(selectedOption)) {
             score++;
         }
+        mediaPlayer.stop();
         currentQuestionIndex++;
         showNextQuestion();
     }
@@ -155,13 +165,15 @@ public class TrivGame extends Application {
         private String correctAnswer;
         private List<String> options;
         private Image image;
+        private Media videoClip;
 
-        public Question(String text, String correctAnswer, List<String> options, Image image) {
+        public Question(String text, String correctAnswer, List<String> options, Image image, String videoPath) {
             this.text = text;
             this.correctAnswer = correctAnswer;
             this.options = new ArrayList<>(options);
             Collections.shuffle(this.options);
             this.image = image;
+            this.videoClip = new Media(getClass().getResource(videoPath).toExternalForm());
         }
 
         public String getText() {
@@ -174,6 +186,10 @@ public class TrivGame extends Application {
 
         public Image getImage() {
             return image;
+        }
+
+        public Media getVideoClip() {
+            return videoClip;
         }
 
         public boolean isCorrect(String selectedOption) {
