@@ -8,12 +8,17 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.stage.Stage;
 import javafx.scene.media.Media;
+import javafx.scene.media.MediaException;
 import javafx.scene.media.MediaPlayer;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.nio.file.Paths;
 
 public class TrivGame extends Application {
 
@@ -44,18 +49,30 @@ public class TrivGame extends Application {
     private void initializeQuestions() {
         questions = new ArrayList<>();
 
-        // Add questions with associated images and video clips
-        Image maseruImage = new Image(getClass().getResource("/com/example/triviagame/maseru.jpg").toExternalForm());
-        questions.add(new Question("What is the capital city of Lesotho?", "Maseru",
-                Arrays.asList("Maseru", "Lobamba", "Manzini", "Mbabane"),
-                maseruImage, "/com/example/triviagame/maseru.mp4"));
+        try {
+            Image maseruImage = new Image(getClass().getResource("/com/example/triviagame/maseru.jpg").toExternalForm());
+            questions.add(new Question("What is the capital city of Lesotho?", "Maseru",
+                    Arrays.asList("Maseru", "Lobamba", "Manzini", "Mbabane"),
+                    maseruImage, "/com/example/triviagame/maseru.mp4"));
 
-        Image katseDamImage = new Image(getClass().getResource("/com/example/triviagame/katseDam.jpg").toExternalForm());
-        questions.add(new Question("What is the dam found in Lesotho?", "Katse Dam",
-                Arrays.asList("Kariba Dam", "Chief Joseph Dam", "Katse Dam", "Tarbela Dam"),
-                katseDamImage, "/com/example/triviagame/katse.mp4"));
+            Image katseDamImage = new Image(getClass().getResource("/com/example/triviagame/katseDam.jpg").toExternalForm());
+            questions.add(new Question("What is the dam found in Lesotho?", "Katse Dam",
+                    Arrays.asList("Kariba Dam", "Chief Joseph Dam", "Katse Dam", "Tarbela Dam"),
+                    katseDamImage, "/com/example/triviagame/katse.mp4"));
 
-        // Add more questions similarly
+            Image mountainImage = new Image(getClass().getResource("/com/example/triviagame/Mountain.jpg").toExternalForm());
+            questions.add(new Question("What is a geographical feature found in Lesotho", "Mountains",
+                    Arrays.asList("Mountains", "Oceans", "Deserts", "Seas"),
+                    mountainImage, "/com/example/triviagame/mountain.mp4"));
+
+            Image languageImage = new Image(getClass().getResource("/com/example/triviagame/language.webp").toExternalForm());
+            questions.add(new Question("What is the official language of Lesotho?", "Sesotho",
+                    Arrays.asList("Sesotho", "Zulu", "English", "Afrikaans"),
+                    languageImage, ""));
+        } catch (NullPointerException | MediaException e) {
+            e.printStackTrace();
+            System.out.println("Failed to load media file for questions.");
+        }
     }
 
 
